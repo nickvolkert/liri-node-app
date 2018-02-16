@@ -1,38 +1,80 @@
 require("dotenv").config();
-var request = require("request");
 var keys = require("./keys.js");
-var spotify = Spotify(keys.spotify);
-var client = Twitter(keys.twitter);
-var fs = require("fs");
-var SpotifyApp = require('node-spotify-api');
+var Twitter = require('twitter');
+var Spotify = require('node-spotify-api');
+var request = require("request");
+var twitterApp = new Twitter(keys.twitter);
+var spotifyApp = new Spotify(keys.spotify);
+
 var movieTitle = ("space+jam");
 var songQuery = ("./random.txt");
+var argumentTwo = process.argv[2];
+var argumentThree = process.argv[3];
 
-// Running the readFile module that's inside of fs.
-// Stores the read information into the variable "data"
-// fs.readFile("random.txt", "utf8", function(err, data) {
-//   if (err) {
-//     return console.log(err);
-//   }
+function logItPretty(){
+  console.log("");
+  console.log("--------------------------------------------------------------------------");
+  console.log("");
+}
 
-//   // Break the string down by comma separation and store the contents into the output array.
-//   var output = data.split(",");
+//1. Twitter
+if(argumentTwo === "my-tweets"){
+    var params = { screen_name: "nickv47", count: 20 };
+    twitterApp.get("statuses/user_timeline", params, function(error, tweets, response) {
+      if (!error) {
+        for (var i = 0; i < tweets.length; i++) {
+          console.log('"' + tweets[i].text + '"');
+          console.log("");
+          console.log("Tweet Created: " + tweets[i].created_at);
+          logItPretty();
+        }
+      }
+    });
+}
 
-//   // Loop Through the newly created output array
-//   for (var i = 0; i < output.length; i++) {
+//Spotify Search Function
+function spotifySearch(){
+  var userSong = process.argv[3];
 
-//     // Print each element (item) of the array/
-//     console.log(output[i]);
-//   }
-// });
+  spotifyApp.search({ type: "track", query: userSong, count: 10 }, function(err, data) {
+    if (err) {
+      return console.log("Error occurred: " + err);
+    }
+    var spotifyInfo = data.tracks.items;
+    for (var i = 0; i < spotifyInfo.length; i++) {
+      var artist = spotifyInfo[i].artists[0].name;
+      var song = spotifyInfo[i].name;
+      var prev = spotifyInfo[i].preview_url;
+      var album = spotifyInfo[i].album.name;
+      console.log("Artist: " + artist);
+      console.log("Song: " + '"' + song + '"');
+      console.log("Preview URL: " + prev);
+      console.log("Album: " + '"' + album + '"');
+      logItPretty();
+    }
+  });
 
-spotify.search({ type: 'track', songQuery: 'query' }, function(err, data) {
-  if (err) {
-    return console.log('Error occurred: ' + err);
-  }
-  console.log(this.songQuery);
-  console.log("Artist: " + data.tracks.items[0].artists[0].name);
-});
+}
+
+// 2. Spotify this song
+if(argumentTwo === "spotify-this-song"){
+    if (process.argv[3]){
+      spotifySearch();
+    } else {
+      var userSong = ("The Sign");
+      spotifySearch(userSong);
+    }
+}
+
+// * Artist(s)
+//
+// * The song's name
+//
+// * A preview link of the song from Spotify
+//
+// * The album that the song is from
+//
+// * If no song is provided then your program will default to "The Sign" by Ace of Base.
 
 // console.log(data);
 // });
