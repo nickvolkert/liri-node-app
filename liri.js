@@ -10,6 +10,7 @@ var movieTitle = ("space+jam");
 var songQuery = ("./random.txt");
 var argumentTwo = process.argv[2];
 var argumentThree = process.argv[3];
+var argumentFour = process.argv[4];
 
 function logItPretty(){
   console.log("");
@@ -35,7 +36,11 @@ if(argumentTwo === "my-tweets"){
 //Spotify Search Function
 function spotifySearch(){
   var userSong = process.argv[3];
-
+  // if (title){
+  //   var userSong = title;
+  // } else {
+  //   var userSong = output ? output : "'The Sign' by Ace of Base";
+  // }
   spotifyApp.search({ type: "track", query: userSong, count: 10 }, function(err, data) {
     if (err) {
       return console.log("Error occurred: " + err);
@@ -60,69 +65,44 @@ function spotifySearch(){
 if(argumentTwo === "spotify-this-song"){
     if (process.argv[3]){
       spotifySearch();
-    } else {
-      var userSong = ("The Sign");
-      spotifySearch(userSong);
     }
 }
 
-// * Artist(s)
-//
-// * The song's name
-//
-// * A preview link of the song from Spotify
-//
-// * The album that the song is from
-//
-// * If no song is provided then your program will default to "The Sign" by Ace of Base.
+// 3. Movie This
+if(argumentTwo === "movie-this"){
+  var request = require("request");
+  var nodeArgs = process.argv;
+  var movieName = "Mr. Nobody";
+  for (var i = 2; i < nodeArgs.length; i++) {
+    if (i > 2 && i < nodeArgs.length) {
+      movieName = movieName + "+" + nodeArgs[i];
+    } else {
+      movieName += nodeArgs[i];
+    }
+  }
+  var queryUrl = "http://www.omdbapi.com/?t=" + movieName + "&y=&plot=short&apikey=trilogy";
 
-// console.log(data);
-// });
-// var request = require('request');
-// request('http://www.google.com', function (error, response, body) {
-//   console.log('error:', error); // Print the error if one occurred
-//   console.log('statusCode:', response && response.statusCode); // Print the response status code if a response was received
-//   console.log('body:', body); // Print the HTML for the Google homepage.
-// });
+  request(queryUrl, function(error, response, body) {
+    var parseThis = JSON.parse(body);
+    if (!error && response.statusCode === 200) {
+      console.log(JSON.parse(body));
+      console.log("Title: " + parseThis.Title);
+      console.log("Release Year: " + parseThis.Year);
+      console.log("IMDB Rating: " + parseThis.Ratings[0].Value);
+      console.log("Rotten Tomatoes Rating: " + parseThis.Ratings[1].Value);
+      console.log("Production Country(ies): " + parseThis.Country);
+      console.log("Language: " + parseThis.Language);
+      console.log("Plot: " + parseThis.Plot);
+      console.log("Actors: " + parseThis.Actors);
+      logItPretty();
+    }
+  });
+}
 
-// var request = require("request");
-
-// // Store all of the arguments in an array
-// var nodeArgs = process.argv;
-
-// // Create an empty variable for holding the movie name
-// var movieName = "";
-
-// // Loop through all the words in the node argument
-// // And do a little for-loop magic to handle the inclusion of "+"s
-// for (var i = 2; i < nodeArgs.length; i++) {
-
-//   if (i > 2 && i < nodeArgs.length) {
-
-//     movieName = movieName + "+" + nodeArgs[i];
-
-//   }
-
-//   else {
-
-//     movieName += nodeArgs[i];
-
-//   }
-// }
-
-// // Then run a request to the OMDB API with the movie specified
-// var queryUrl = "http://www.omdbapi.com/?t=" + movieName + "&y=&plot=short&apikey=trilogy";
-
-// // This line is just to help us debug against the actual URL.
-// console.log(queryUrl);
-
-// request(queryUrl, function(error, response, body) {
-
-//   // If the request is successful
-//   if (!error && response.statusCode === 200) {
-
-//     // Parse the body of the site and recover just the imdbRating
-//     // (Note: The syntax below for parsing isn't obvious. Just spend a few moments dissecting it).
-//     console.log("Release Year: " + JSON.parse(body).Year);
-//   }
-// });
+//4. Do What it Says
+if(argumentTwo === "do-what-it-says"){
+    var fs = require("fs");
+    fs.readFile('random.txt', "utf8", function(err, data){
+        console.log(data);
+    });
+}
